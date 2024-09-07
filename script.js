@@ -1,101 +1,78 @@
-//querySelector
-document.querySelectorAll('.number').forEach(button => {
-    button.addEventListener('click', (e) => {
-        handleNumberClick(e.target.value);
+document.addEventListener('DOMContentLoaded', () => {
+    const display = document.querySelector('.display');
+    const buttons = document.querySelector('.buttons');
+
+    buttons.addEventListener('click', (e) => {
+        if (e.target.matches('button')) {
+            const key = e.target;
+            const action = key.classList[0];
+            const keyContent = key.textContent;
+
+            if (action === 'number') {
+                appendToDisplay(keyContent);
+            }
+            if (action === 'operator') {
+                appendToDisplay(keyContent);
+            }
+            if (action === 'decimal') {
+                appendToDisplay(keyContent);
+            }
+            if (action === 'clear') {
+                clearDisplay();
+            }
+            if (action === 'equals') {
+                calculate();
+            }
+        }
     });
-});
 
-document.querySelectorAll('.operator').forEach(button => {
-    button.addEventListener('click', (e) => {
-        handleOperatorClick(e.target.value);
-    });
-});
-
-document.querySelector('.equals').addEventListener('click', handleEqualsClick);
-
-document.querySelector('.clear').addEventListener('click', clearDisplay);
-
-//function to populate display
-
-let displayValue = '';
-let currentOperator = null;
-let firstOperand = null;
-let secondOperand = null;
-
-const display = document.getElementById('display');
-
-// Function to update the display
-function updateDisplay(value) {
-    display.innerText = value;
-}
-
-// Function to handle number button clicks
-function handleNumberClick(value) {
-    displayValue += value;
-    updateDisplay(displayValue);
-}
-
-// Function to handle operator button clicks
-function handleOperatorClick(op) {
-    firstOperand = parseFloat(displayValue);
-    currentOperator = op;
-    displayValue = '';
-}
-
-// Function to handle equals button click
-function handleEqualsClick() {
-    secondOperand = parseFloat(displayValue);
-    const result = operate(currentOperator, firstOperand, secondOperand);
-    updateDisplay(result);
-    displayValue = result;
-}
-
-// Clear the display
-function clearDisplay() {
-    displayValue = '';
-    firstOperand = null;
-    secondOperand = null;
-    currentOperator = null;
-    updateDisplay('0');
-}
-
-// basic function math
-
-function Add (a,b) {
-    return a+b;
-}
-
-function Subtract (a,b) {
-    return a-b;
-}
-
-function Multiply (a,b) {
-    return a*b;
-}
-
-function Divide (a,b) {
-    return a/b;
-}
-
-const first_Operand = 0;
-const second_Operand = 0;
-const operator_Sign = '';
-
-function operate (first_Number, operator, second_Number) {
-    switch (operator) {
-        case '+':
-            Add(first_Number, second_Number);
-            break;
-        case '-':
-            Subtract(first_Number, second_Number);
-            break;
-        case '*':
-            Multiply(first_Number, second_Number);
-            break;
-        case '/':
-            Divide(first_Number, second_Number);
-            break; 
-        default:
-            console.log(">.<");
+    function appendToDisplay(value) {
+        if (display.textContent === '0') {
+            display.textContent = value;
+        } else {
+            display.textContent += value;
+        }
     }
-}
+
+    function clearDisplay() {
+        display.textContent = '0';
+    }
+
+    function calculate() {
+        try {
+            const expression = display.textContent;
+            const result = evaluateExpression(expression);
+            display.textContent = result;
+        } catch (error) {
+            display.textContent = 'Error';
+        }
+    }
+
+    function evaluateExpression(expression) {
+        const tokens = expression.match(/(\-?\d+\.?\d*|\+|\-|\*|\/|\(|\))/g);
+        let result = parseFloat(tokens[0]);
+        
+        for (let i = 1; i < tokens.length; i += 2) {
+            const operator = tokens[i];
+            const operand = parseFloat(tokens[i + 1]);
+            
+            switch (operator) {
+                case '+':
+                    result += operand;
+                    break;
+                case '-':
+                    result -= operand;
+                    break;
+                case '*':
+                    result *= operand;
+                    break;
+                case '/':
+                    if (operand === 0) throw new Error('Division by zero');
+                    result /= operand;
+                    break;
+            }
+        }
+        
+        return result;
+    }
+});
